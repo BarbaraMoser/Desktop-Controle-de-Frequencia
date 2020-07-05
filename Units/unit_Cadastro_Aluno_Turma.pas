@@ -35,6 +35,8 @@ type
     procedure setAluno;
   public
     procedure gravarAlunoTurmaMateria(id_aluno_turma: String);
+    procedure validarCamposSelecionados;
+    procedure verificarAlunoTurmaExistente;
   end;
 
 var
@@ -53,6 +55,9 @@ var
   slDadosAlunoTurma: TStringList;
   busca_id: TCadastro;
 begin
+  self.validarCamposSelecionados;
+  self.verificarAlunoTurmaExistente;
+
   LbAlunoTurma.Items.Objects[LbAlunoTurma.Items.Add(CbAlunoTurma.Selected.Text)] := TObject(IntToStr(Integer(CbAlunoTurma.Items.Objects[CbAlunoTurma.ItemIndex])));
 
   aluno_selecionado := TFDQuery.Create(nil);
@@ -85,18 +90,18 @@ end;
 
 procedure TUnitCadastroAlunoTurma.FormCreate(Sender: TObject);
 begin
+  self.setAluno;
   self.setCurso;
   self.setTurma;
-  self.setAluno;
-
-  if CbCursoTurma.Count = 0 then
-    raise Exception.Create('Não há curso cadastrado ainda.');
 
   if cbTurma.Count = 0 then
     raise Exception.Create('Não há turmas cadastradas ainda.');
 
   if CbAlunoTurma.Count = 0 then
     raise Exception.Create('Não há alunos cadastrados ainda.');
+
+  if CbCursoTurma.Count = 0 then
+    raise Exception.Create('Não há curso cadastrado ainda.');
 end;
 
 procedure TUnitCadastroAlunoTurma.gravarAlunoTurmaMateria(id_aluno_turma: String);
@@ -155,10 +160,10 @@ begin
 
   except
     on e:exception do
-     begin
-          ShowMessage('Comando SQL não executado: ' + e.ToString);
-          exit;
-     end;
+      begin
+        ShowMessage('Comando SQL não executado: ' + e.ToString);
+        exit;
+      end;
   end;
 end;
 
@@ -184,10 +189,10 @@ begin
 
   except
     on e:exception do
-     begin
-          ShowMessage('Comando SQL não executado: ' + e.ToString);
-          exit;
-     end;
+      begin
+        ShowMessage('Comando SQL não executado: ' + e.ToString);
+        exit;
+      end;
   end;
 end;
 
@@ -213,16 +218,56 @@ begin
 
   except
     on e:exception do
-     begin
-          ShowMessage('Comando SQL não executado: ' + e.ToString);
-          exit;
-     end;
+      begin
+        ShowMessage('Comando SQL não executado: ' + e.ToString);
+        exit;
+      end;
   end;
 end;
 
 procedure TUnitCadastroAlunoTurma.spVoltarPrincipalClick(Sender: TObject);
 begin
   self.Close;
+end;
+
+
+procedure TUnitCadastroAlunoTurma.validarCamposSelecionados;
+begin
+  if self.CbCursoTurma.ItemIndex = -1 then
+    raise Exception.Create('É preciso selecionar um curso.');
+  if self.cbTurma.ItemIndex = -1 then
+    raise Exception.Create('É preciso selecionar uma turma.');
+  if self.CbAlunoTurma.ItemIndex = -1 then
+    raise Exception.Create('É preciso selecionar um aluno.');
+end;
+
+procedure TUnitCadastroAlunoTurma.verificarAlunoTurmaExistente;
+var
+  aluno_turma: TFDQuery;
+begin
+  aluno_turma := TFDQuery.Create(nil);
+  aluno_turma.Connection := dm_BancoDados.FDEscola;
+  aluno_turma.Close;
+  aluno_turma.SQL.Clear;
+  aluno_turma.SQL.Add('select * from aluno_turma');
+  aluno_turma.SQL.Add('where ID_ALUNO = ' + IntToStr(Integer(CbAlunoTurma.Items.Objects[CbAlunoTurma.ItemIndex])));
+  aluno_turma.SQL.Add('and ID_TURMA = ' + IntToStr(Integer(cbTurma.Items.Objects[cbTurma.ItemIndex])));
+  aluno_turma.SQL.Add('and ID_CURSO = ' + IntToStr(Integer(CbCursoTurma.Items.Objects[CbCursoTurma.ItemIndex])));
+
+  try
+    aluno_turma.Open;
+
+  except
+    on e:exception do
+      begin
+        ShowMessage('Comando SQL não executado: ' + e.ToString);
+        exit;
+      end;
+  end;
+
+  if not aluno_turma.IsEmpty then
+    raise Exception.Create('Não é possível cadastrar o aluno duas vezes na mesma turma.');
+
 end;
 
 end.

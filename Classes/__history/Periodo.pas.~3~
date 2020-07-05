@@ -1,0 +1,24 @@
+unit Periodo;
+
+interface
+
+uses Cadastro;
+
+type TPeriodo = class(TCadastro)
+   private
+    id: integer;
+    periodo: String;
+   public
+    function get_id: integer;
+end;
+
+implementation
+
+{ TPeriodo }
+
+function TPeriodo.get_id: integer;
+begin
+  result := self.id;
+end;
+
+end.

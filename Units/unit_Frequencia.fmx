@@ -1,4 +1,4 @@
-object UnitConsultaFrequencia: TUnitConsultaFrequencia
+﻿object UnitConsultaFrequencia: TUnitConsultaFrequencia
   Left = 0
   Top = 0
   BorderIcons = []
@@ -325,21 +325,24 @@ object UnitConsultaFrequencia: TUnitConsultaFrequencia
       Size.PlatformDefault = False
       TabOrder = 16
       Options = [ColumnResize, ColLines, RowLines, RowSelect, Tabs, Header, HeaderClick, AutoDisplacement]
-      Viewport.Width = 573.000000000000000000
-      Viewport.Height = 160.000000000000000000
-      object QTDE_AULAS_DIA: TStringColumn
-        Header = 'QT_AULAS'
-        Size.Width = 80.000000000000000000
-      end
-      object QTDE_FALTAS: TStringColumn
-        Header = 'QT_FALTAS'
-        ReadOnly = True
-        Size.Width = 80.000000000000000000
-      end
+      Viewport.Width = 593.000000000000000000
+      Viewport.Height = 185.000000000000000000
       object ALUNO: TStringColumn
         Header = 'ALUNO'
         ReadOnly = True
         Size.Width = 278.000000000000000000
+      end
+      object MATÉRIA: TStringColumn
+        Header = 'MAT'#201'RIA'
+      end
+      object QTDE_AULAS_DIA: TStringColumn
+        Header = 'QT_AULAS'
+        Size.Width = 63.000000000000000000
+      end
+      object QTDE_FALTAS: TStringColumn
+        Header = 'QT_FALTAS'
+        ReadOnly = True
+        Size.Width = 65.000000000000000000
       end
       object FREQUENCIA_GERAL: TStringColumn
         Header = 'FREQUENCIA GERAL'
@@ -409,7 +412,6 @@ object UnitConsultaFrequencia: TUnitConsultaFrequencia
     end
     object dtDataFim: TDateEdit
       Date = 43917.000000000000000000
-      OnChange = dtDataFimChange
       Position.X = 479.000000000000000000
       Position.Y = 51.000000000000000000
       Size.Width = 113.000000000000000000
@@ -444,13 +446,14 @@ object UnitConsultaFrequencia: TUnitConsultaFrequencia
       TabOrder = 1
     end
     object BtBuscarAlunos: TButton
-      Position.X = 257.000000000000000000
+      Position.X = 185.000000000000000000
       Position.Y = 96.000000000000000000
       Size.Width = 112.000000000000000000
       Size.Height = 22.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 8
       Text = 'Buscar Alunos'
+      OnCanFocus = BtBuscarAlunosCanFocus
       OnClick = BtBuscarAlunosClick
     end
     object LbWarningDados: TLabel
@@ -466,6 +469,40 @@ object UnitConsultaFrequencia: TUnitConsultaFrequencia
         '***Os dados de QT_AULAS e QT_FALTAS s'#227'o referentes ao per'#237'odo fi' +
         'ltrado na busca'
       TabOrder = 17
+    end
+    object CbTipoRelatorio: TComboBox
+      Items.Strings = (
+        'Gerar Relat'#243'rio'
+        'HTML'
+        'WORD'
+        'TXT')
+      ItemIndex = 0
+      Position.X = 304.000000000000000000
+      Position.Y = 96.000000000000000000
+      Size.Width = 113.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 15
+    end
+    object SpGerarRelatorio: TSpeedButton
+      Images = dm_BancoDados.ImageList1
+      ImageIndex = 4
+      Position.X = 416.000000000000000000
+      Position.Y = 96.000000000000000000
+      Size.Width = 33.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      OnClick = SpGerarRelatorioClick
+    end
+    object Label3: TLabel
+      Position.X = 104.000000000000000000
+      Position.Y = -72.000000000000000000
+      Size.Width = 505.000000000000000000
+      Size.Height = 17.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Label3'
+      Visible = False
+      TabOrder = 19
     end
   end
   object Panel2: TPanel

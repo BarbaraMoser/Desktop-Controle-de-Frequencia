@@ -35,9 +35,7 @@ type
     procedure btnDeletarClick(Sender: TObject);
     procedure DtInicioTurmaCanFocus(Sender: TObject; var ACanFocus: Boolean);
     procedure FormCreate(Sender: TObject);
-    procedure DtFimTurmaChange(Sender: TObject);
-    procedure btnSalvarMouseMove(Sender: TObject; Shift: TShiftState; X,
-      Y: Single);
+    procedure cbSemestreCanFocus(Sender: TObject; var ACanFocus: Boolean);
   private
     { Private declarations }
   public
@@ -60,6 +58,7 @@ begin
   cad_alunos_turma := TUnitCadastroAlunoTurma.Create(Application);
   cad_alunos_turma.showmodal;
 end;
+
 
 procedure TUnitCadastroTurmas.btnDeletarClick(Sender: TObject);
 var
@@ -89,6 +88,9 @@ var
   turma:TTurma;
   slDados:TStringList;
 begin
+  if cbSemestre.ItemIndex = 0 then
+    raise Exception.Create('É preciso selecionar um Semestre.');
+
   slDados := TStringList.Create;
   slDados.Clear;
   turma := TTurma.Create('turma');
@@ -123,17 +125,12 @@ begin
   turma.Free;
 end;
 
-procedure TUnitCadastroTurmas.btnSalvarMouseMove(Sender: TObject;
-  Shift: TShiftState; X, Y: Single);
+procedure TUnitCadastroTurmas.cbSemestreCanFocus(Sender: TObject;
+  var ACanFocus: Boolean);
+var
+  utils: TUtils;
 begin
-  if cbSemestre.ItemIndex = 0 then
-    raise Exception.Create('É preciso selecionar um Semestre.')
-end;
-
-procedure TUnitCadastroTurmas.DtFimTurmaChange(Sender: TObject);
-begin
-  if DtFimTurma.Date <= DtInicioTurma.Date then
-    raise Exception.Create('A data de término deve ser maior que a data de início.')
+  utils.validarDatas(DtInicioTurma.Date, DtFimTurma.Date, DtFimTurma);
 end;
 
 procedure TUnitCadastroTurmas.DtInicioTurmaCanFocus(Sender: TObject; var ACanFocus: Boolean);

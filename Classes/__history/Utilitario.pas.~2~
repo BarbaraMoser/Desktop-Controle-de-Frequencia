@@ -1,0 +1,33 @@
+unit Utilitario;
+
+interface
+uses
+     FMX.Forms, FMX.Edit, FMX.Memo;
+type
+    Tutilitario = class
+      public
+            procedure LimpaTela(var Form);
+    end;
+
+
+implementation
+
+{ Tutilitario }
+
+procedure Tutilitario.LimpaTela(var Form);
+var
+  Temp:TCustomForm;
+  i: integer;
+begin
+     Temp:=TCustomForm(form);
+     for i := 0 to (Temp.ComponentCount - 1) do
+         begin
+              if (Temp.Components[i] is TEdit) then
+                TEdit(Temp.Components[i]).Text := ''
+              else
+              if (Temp.Components[i] is TMemo) then
+                TMemo(Temp.Components[i]).Text := ''
+         end;
+end;
+
+end.

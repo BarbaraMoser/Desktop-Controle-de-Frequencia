@@ -1,0 +1,161 @@
+object UnitRegistroFrequencia: TUnitRegistroFrequencia
+  Left = 0
+  Top = 0
+  BorderIcons = []
+  Caption = 'Registro Frequencia'
+  ClientHeight = 321
+  ClientWidth = 497
+  Position = DesktopCenter
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object Panel1: TPanel
+    Align = Client
+    Size.Width = 497.000000000000000000
+    Size.Height = 321.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object Panel4: TPanel
+      Position.Y = 248.000000000000000000
+      Size.Width = 497.000000000000000000
+      Size.Height = 72.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 11
+      object btnSalvar: TSpeedButton
+        Align = Scale
+        StyledSettings = [Family, Style]
+        Images = dm_BancoDados.ImageList1
+        ImageIndex = 4
+        Position.X = 152.000000000000000000
+        Size.Width = 94.000000000000000000
+        Size.Height = 72.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Salvar'
+        TextSettings.Font.Size = 20.000000000000000000
+        TextSettings.FontColorForState.Pressed = claTeal
+        OnClick = btnSalvarClick
+        OnMouseMove = btnSalvarMouseMove
+      end
+      object spVoltarPrincipal: TSpeedButton
+        StyledSettings = [Family, Style, FontColor]
+        Images = dm_BancoDados.ImageList1
+        ImageIndex = 3
+        Position.X = 268.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 88.000000000000000000
+        Size.Height = 72.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Voltar'
+        TextSettings.Font.Size = 20.000000000000000000
+        TextSettings.HorzAlign = Leading
+        OnClick = spVoltarPrincipalClick
+      end
+    end
+    object LbData: TLabel
+      Enabled = False
+      StyledSettings = [Family, Style, FontColor]
+      Position.X = 22.000000000000000000
+      Position.Y = 87.000000000000000000
+      Size.Width = 94.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 20.000000000000000000
+      TextSettings.HorzAlign = Trailing
+      Text = 'Data Aula'
+      TabOrder = 10
+    end
+    object Edit1: TEdit
+      Touch.InteractiveGestures = [LongTap, DoubleTap]
+      TabOrder = 4
+      TextSettings.Font.Size = 20.000000000000000000
+      Position.X = 131.000000000000000000
+      Position.Y = 87.000000000000000000
+      Enabled = False
+      Size.Width = 329.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      StyledSettings = [Family, Style, FontColor]
+      OnCanFocus = edNomeMateriaCanFocus
+    end
+    object LbAluno: TLabel
+      Enabled = False
+      StyledSettings = [Family, Style, FontColor]
+      Position.X = 22.000000000000000000
+      Position.Y = 23.000000000000000000
+      Size.Width = 94.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 20.000000000000000000
+      TextSettings.HorzAlign = Trailing
+      Text = 'Aluno'
+      TabOrder = 7
+    end
+    object EdAluno: TEdit
+      Touch.InteractiveGestures = [LongTap, DoubleTap]
+      TabOrder = 1
+      TextSettings.Font.Size = 20.000000000000000000
+      Position.X = 131.000000000000000000
+      Position.Y = 23.000000000000000000
+      Enabled = False
+      Size.Width = 329.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      StyledSettings = [Family, Style, FontColor]
+      OnCanFocus = edNomeMateriaCanFocus
+    end
+    object Label1: TLabel
+      Enabled = False
+      StyledSettings = [Family, Style, FontColor]
+      Position.X = 102.000000000000000000
+      Position.Y = 143.000000000000000000
+      Size.Width = 139.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 20.000000000000000000
+      TextSettings.HorzAlign = Center
+      Text = 'Qtde Aula/Dia'
+      TabOrder = 9
+    end
+    object Label2: TLabel
+      Enabled = False
+      StyledSettings = [Family, Style, FontColor]
+      Position.X = 263.000000000000000000
+      Position.Y = 143.000000000000000000
+      Size.Width = 139.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 20.000000000000000000
+      TextSettings.HorzAlign = Center
+      Text = 'Qtde Faltas/Dia'
+      TabOrder = 8
+    end
+    object Edit2: TEdit
+      Touch.InteractiveGestures = [LongTap, DoubleTap]
+      TabOrder = 3
+      TextSettings.Font.Size = 20.000000000000000000
+      TextSettings.HorzAlign = Center
+      Position.X = 107.000000000000000000
+      Position.Y = 175.000000000000000000
+      Size.Width = 134.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      StyledSettings = [Family, Style, FontColor]
+      OnCanFocus = edNomeMateriaCanFocus
+    end
+    object Edit3: TEdit
+      Touch.InteractiveGestures = [LongTap, DoubleTap]
+      TabOrder = 2
+      TextSettings.Font.Size = 20.000000000000000000
+      TextSettings.HorzAlign = Center
+      Position.X = 265.000000000000000000
+      Position.Y = 175.000000000000000000
+      Size.Width = 137.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      StyledSettings = [Family, Style, FontColor]
+      OnCanFocus = edNomeMateriaCanFocus
+    end
+  end
+end

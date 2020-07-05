@@ -1,0 +1,98 @@
+unit unit_Cadastro_Curso;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
+  FMX.ListBox, FMX.DateTimeCtrls, FMX.Edit, FMX.Controls.Presentation,
+  FireDAC.Comp.Client, FMX.Layouts, unit_Cadastro_Curso_Materia;
+
+type
+  TUnitCadastroCursos = class(TForm)
+    Panel1: TPanel;
+    Panel3: TPanel;
+    edNomeCurso: TEdit;
+    LbNomeCurso: TLabel;
+    Panel4: TPanel;
+    btnSalvar: TSpeedButton;
+    Panel5: TPanel;
+    Label6: TLabel;
+    spVoltarPrincipal: TSpeedButton;
+    ImageControl1: TImageControl;
+    Label1: TLabel;
+    Label2: TLabel;
+    BtAdicionarMateriasCurso: TButton;
+    btnDeletar: TSpeedButton;
+    LbIdCurso: TLabel;
+    procedure btnSalvarClick(Sender: TObject);
+    procedure spVoltarPrincipalClick(Sender: TObject);
+    procedure BtAdicionarMateriasCursoClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    function verificarCursoBanco(id_curso: String): TFDQuery;
+  end;
+
+var
+  UnitCadastroCursos: TUnitCadastroCursos;
+
+implementation
+
+{$R *.fmx}
+
+uses unit_BancoDados, Curso, Curso_Materia;
+
+procedure TUnitCadastroCursos.BtAdicionarMateriasCursoClick(Sender: TObject);
+var
+  cad_materia_curso: TUnitCadastroCursoMaterias;
+begin
+  cad_materia_curso := TUnitCadastroCursoMaterias.Create(Application);
+  cad_materia_curso.showmodal;
+end;
+
+procedure TUnitCadastroCursos.btnSalvarClick(Sender: TObject);
+var
+  curso:TCurso;
+  slDadosCurso:TStringList;
+begin
+  slDadosCurso := TStringList.Create;
+  slDadosCurso.Clear;
+
+
+  slDadosCurso.Add('0');
+  slDadosCurso.Add(edNomeCurso.Text);
+  slDadosCurso.Add('1');
+
+  curso := TCurso.Create('curso');
+  curso.estado := 0;
+  curso.insert(slDadosCurso);
+
+  curso.utilitario.LimpaTela(self);
+  edNomeCurso.SetFocus;
+  curso.Free;
+end;
+
+
+procedure TUnitCadastroCursos.spVoltarPrincipalClick(Sender: TObject);
+begin
+  self.Close;
+end;
+
+function TUnitCadastroCursos.verificarCursoBanco(id_curso: String): TFDQuery;
+var
+  consulta_curso: TFDQuery;
+begin
+  consulta_curso := TFDQuery.Create(nil);
+  consulta_curso.Connection := dm_BancoDados.FDEscola;
+  consulta_curso.Close;
+  consulta_curso.SQL.Clear;
+  consulta_curso.SQL.Add('select * from curso');
+  consulta_curso.SQL.Add('where id_curso');
+  consulta_curso.SQL.Add('= "' + id_curso + '" and ativo = 1');
+  consulta_curso.Open;
+
+  result := consulta_curso;;
+end;
+
+end.

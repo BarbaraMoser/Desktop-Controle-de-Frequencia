@@ -1,0 +1,59 @@
+unit unit_Principal;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
+  FMX.ListBox, FMX.Controls.Presentation, FMX.Layouts;
+
+type
+  Tform_Principal = class(TForm)
+    ListBox1: TListBox;
+    ListBoxHeader1: TListBoxHeader;
+    Label1: TLabel;
+    ListBoxItem1: TListBoxItem;
+    spCadastro: TSpeedButton;
+    procedure spCadastroClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  form_Principal: Tform_Principal;
+
+implementation
+
+{$R *.fmx}
+
+uses unit_BancoDados, Aluno, Pessoa;
+
+procedure Tform_Principal.spCadastroClick(Sender: TObject);
+var
+   pessoa: TPessoa;
+   aluno: TAluno;
+   slDados:TStringList;
+begin
+     slDados := TStringList.Create;
+     slDados.Clear;
+     slDados.Add('0');
+     slDados.Add('Pedro');
+     slDados.Add('1234');
+     slDados.Add('10/02/2000');
+     slDados.Add('1');
+
+     pessoa := TPessoa.Create('pessoa');
+     pessoa.estado := 0;
+     pessoa.insert(slDados);
+
+     slDados.Add('0');
+     slDados.Add('1');
+
+     aluno := TAluno.Create('aluno');
+     aluno.estado := 0;
+     aluno.insert(slDados);
+end;
+
+end.

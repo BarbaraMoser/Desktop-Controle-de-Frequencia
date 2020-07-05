@@ -1,0 +1,66 @@
+unit unit_Principal;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
+  FMX.ListBox, FMX.Controls.Presentation, FMX.Layouts, FMX.DateTimeCtrls,
+  FMX.Edit, unit_Cadastros, FMX.Ani, FMX.ExtCtrls, unit_Cadastro_Diario;
+
+type
+  Tform_Principal = class(TForm)
+    ListBox1: TListBox;
+    ListBoxHeader1: TListBoxHeader;
+    Label1: TLabel;
+    ImageViewer1: TImageViewer;
+    BitmapAnimation1: TBitmapAnimation;
+    BitmapListAnimation1: TBitmapListAnimation;
+    Panel2: TPanel;
+    Label2: TLabel;
+    spCadastro: TSpeedButton;
+    SpBtBusca: TSpeedButton;
+    SpBtFrequencia: TSpeedButton;
+    procedure spCadastroClick(Sender: TObject);
+    procedure SpBtBuscaClick(Sender: TObject);
+    procedure SpBtFrequenciaClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  form_Principal: Tform_Principal;
+
+implementation
+
+{$R *.fmx}
+
+uses unit_BancoDados, Aluno, Pessoa, unit_Tipo_Consultas;
+
+procedure Tform_Principal.SpBtFrequenciaClick(Sender: TObject);
+var
+  frequencia: TUnitCadastroDiario;
+begin
+  frequencia:= TUnitCadastroDiario.Create(Application);
+  frequencia.ShowModal;
+end;
+
+procedure Tform_Principal.spCadastroClick(Sender: TObject);
+var
+  cadastro: TUnitCadastros;
+begin
+  cadastro := TUnitCadastros.Create(Application);
+  cadastro.showmodal;
+end;
+
+procedure Tform_Principal.SpBtBuscaClick(Sender: TObject);
+var
+  consulta: TUnitTipoConsultas;
+begin
+  consulta:= TUnitTipoConsultas.Create(Application);
+  consulta.ShowModal;
+end;
+
+end.

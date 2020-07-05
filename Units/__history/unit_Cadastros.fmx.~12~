@@ -1,0 +1,184 @@
+object UnitCadastros: TUnitCadastros
+  Left = 0
+  Top = 0
+  Caption = 'Cadastro Pessoas'
+  ClientHeight = 480
+  ClientWidth = 640
+  Position = DesktopCenter
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  DesignerMasterStyle = 0
+  object Panel1: TPanel
+    Align = Client
+    Size.Width = 640.000000000000000000
+    Size.Height = 399.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object Panel2: TPanel
+      Size.Width = 213.330001831054700000
+      Size.Height = 153.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object SpbPessoas: TSpeedButton
+        Align = Client
+        StyledSettings = [Family, FontColor]
+        Images = dm_BancoDados.ImageList1
+        ImageIndex = 10
+        Size.Width = 213.330001831054700000
+        Size.Height = 153.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Pessoas'
+        TextSettings.Font.Size = 25.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.HorzAlign = Leading
+      end
+    end
+    object Panel3: TPanel
+      Position.X = 213.000000000000000000
+      Size.Width = 213.000000000000000000
+      Size.Height = 153.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      object SpbContatos: TSpeedButton
+        Align = Client
+        StyledSettings = [Family, FontColor]
+        Images = dm_BancoDados.ImageList1
+        ImageIndex = 9
+        Size.Width = 213.000000000000000000
+        Size.Height = 153.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Contatos'
+        TextSettings.Font.Size = 25.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.HorzAlign = Leading
+      end
+    end
+    object Panel4: TPanel
+      Position.X = 426.000000000000000000
+      Size.Width = 213.000000000000000000
+      Size.Height = 153.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      object SpbTurmas: TSpeedButton
+        Align = Client
+        StyledSettings = [Family, FontColor]
+        Images = dm_BancoDados.ImageList1
+        ImageIndex = 5
+        Size.Width = 213.000000000000000000
+        Size.Height = 153.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Turmas'
+        TextSettings.Font.Size = 25.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.HorzAlign = Leading
+      end
+    end
+    object Panel6: TPanel
+      Position.Y = 152.000000000000000000
+      Size.Width = 213.000000000000000000
+      Size.Height = 153.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 5
+      object SpbPeriodo: TSpeedButton
+        Align = Client
+        StyledSettings = [Family, FontColor]
+        Images = dm_BancoDados.ImageList1
+        ImageIndex = 7
+        Size.Width = 213.000000000000000000
+        Size.Height = 153.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Per'#237'odos'
+        TextSettings.Font.Size = 25.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.HorzAlign = Leading
+      end
+    end
+    object Panel7: TPanel
+      Position.X = 213.000000000000000000
+      Position.Y = 152.000000000000000000
+      Size.Width = 213.000000000000000000
+      Size.Height = 153.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 4
+      object Panel8: TPanel
+        Size.Width = 213.000000000000000000
+        Size.Height = 153.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 6
+        object SpbCursos: TSpeedButton
+          Align = Client
+          StyledSettings = [Family, FontColor]
+          Images = dm_BancoDados.ImageList1
+          ImageIndex = 8
+          Size.Width = 213.000000000000000000
+          Size.Height = 153.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Cursos'
+          TextSettings.Font.Size = 25.000000000000000000
+          TextSettings.Font.StyleExt = {00070000000000000004000000}
+          TextSettings.HorzAlign = Leading
+        end
+      end
+    end
+    object Panel9: TPanel
+      Position.X = 426.000000000000000000
+      Position.Y = 152.000000000000000000
+      Size.Width = 213.000000000000000000
+      Size.Height = 153.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      object SpbMateria: TSpeedButton
+        Align = Client
+        StyledSettings = [Family, FontColor]
+        Images = dm_BancoDados.ImageList1
+        ImageIndex = 9
+        Size.Width = 213.000000000000000000
+        Size.Height = 153.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Mat'#233'rias'
+        TextSettings.Font.Size = 25.000000000000000000
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+        TextSettings.HorzAlign = Leading
+      end
+    end
+    object Panel10: TPanel
+      Position.Y = 304.000000000000000000
+      Size.Width = 640.000000000000000000
+      Size.Height = 95.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 6
+      object spVoltarPrincipal: TSpeedButton
+        Align = Center
+        StyledSettings = [Family, Style, FontColor]
+        Images = dm_BancoDados.ImageList1
+        ImageIndex = 3
+        Size.Width = 82.000000000000000000
+        Size.Height = 95.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Voltar'
+        TextSettings.Font.Size = 20.000000000000000000
+        TextSettings.HorzAlign = Leading
+        OnClick = spVoltarPrincipalClick
+      end
+    end
+  end
+  object Panel5: TPanel
+    Align = Top
+    Size.Width = 640.000000000000000000
+    Size.Height = 81.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 5
+    object Label6: TLabel
+      Align = Center
+      StyledSettings = [Family, Style, FontColor]
+      Size.Width = 387.000000000000000000
+      Size.Height = 50.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.Font.Size = 30.000000000000000000
+      TextSettings.HorzAlign = Center
+      Text = 'Escolha o Tipo de Cadastro'
+      TabOrder = 11
+    end
+  end
+end

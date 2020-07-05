@@ -32,11 +32,16 @@ type
     FREQUENCIA_GERAL: TStringColumn;
     QTDE_AULAS_DIA: TStringColumn;
     LbWarningDados: TLabel;
+    MATÉRIA: TStringColumn;
+    CbTipoRelatorio: TComboBox;
+    SpGerarRelatorio: TSpeedButton;
+    Label3: TLabel;
     procedure spVoltarPrincipalClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure cbCursoChange(Sender: TObject);
     procedure BtBuscarAlunosClick(Sender: TObject);
-    procedure dtDataFimChange(Sender: TObject);
+    procedure BtBuscarAlunosCanFocus(Sender: TObject; var ACanFocus: Boolean);
+    procedure SpGerarRelatorioClick(Sender: TObject);
   private
     procedure setCursos;
     procedure setTurmas(id_curso: string);
@@ -55,8 +60,15 @@ implementation
 
 {$R *.fmx}
 
-uses unit_BancoDados, Contato, Pessoa, Utils, Utilitario;
+uses unit_BancoDados, Contato, Pessoa, Utils, Utilitario, unit_Consulta;
 
+
+procedure TUnitConsultaFrequencia.BtBuscarAlunosCanFocus(Sender: TObject;
+  var ACanFocus: Boolean);
+begin
+  if dtDataInicio.Date > dtDataFim.Date then
+    raise Exception.Create('A data fim deve ser maior que a data de início.')
+end;
 
 procedure TUnitConsultaFrequencia.BtBuscarAlunosClick(Sender: TObject);
 var
@@ -135,15 +147,11 @@ begin
   self.setTurmas(curso_selecionado);
 end;
 
-procedure TUnitConsultaFrequencia.dtDataFimChange(Sender: TObject);
-begin
-  if dtDataInicio.Date <= dtDataFim.Date then
-    raise Exception.Create('A data fim deve ser maior que a data de início.')
-end;
-
 procedure TUnitConsultaFrequencia.FormCreate(Sender: TObject);
 begin
   self.setCursos;
+  dtDataInicio.Data := now;
+  dtDataFim.Data := now + 1;
 end;
 
 procedure TUnitConsultaFrequencia.setAlunos(id_turma: string; data_inicio: string; data_fim: string; dias_uteis_turma: string);
@@ -159,17 +167,23 @@ begin
   alunos_diario.Connection := dm_BancoDados.FDEscola;
   alunos_diario.Close;
   alunos_diario.SQL.Clear;
-  alunos_diario.SQL.Add('select sum(QTDE_AULAS_DIA) as QTDE_AULAS_DIA, sum(QTDE_FALTAS) as QTDE_FALTAS, pessoa.NOME as aluno');
-  alunos_diario.SQL.Add('from aluno_turma, aluno_turma_materia, diario, aluno, pessoa');
-  alunos_diario.SQL.Add('where aluno_turma.ID_TURMA =' + id_turma);
+  alunos_diario.SQL.Add('select pessoa.NOME, ma.NOME as MATERIA,');
+  alunos_diario.SQL.Add('(select sum(QTDE_AULAS_DIA) from diario d2');
+  alunos_diario.SQL.Add('where d2.ID_TURMA_MATERIA = aluno_turma_materia.ID_TURMA_MATERIA');
+  alunos_diario.SQL.Add('and d2.`DATA` between "' + data_inicio + '" and "' + data_fim + '") as QTDE_AULAS_DIA,');
+  alunos_diario.SQL.Add('(select sum(QTDE_FALTAS) from diario d2');
+  alunos_diario.SQL.Add('where d2.ID_TURMA_MATERIA = aluno_turma_materia.ID_TURMA_MATERIA');
+  alunos_diario.SQL.Add('and d2.`DATA` between "' + data_inicio + '" and "' + data_fim + '") as QTDE_FALTAS');
+  alunos_diario.SQL.Add('from diario, aluno_turma, aluno_turma_materia, aluno, pessoa, materia as ma');
+  alunos_diario.SQL.Add('where aluno_turma.ID_TURMA = ' + id_turma);
   alunos_diario.SQL.Add('and aluno_turma.ID_ALUNO = aluno.ID_ALUNO');
   alunos_diario.SQL.Add('and aluno.ID_PESSOA = pessoa.ID_PESSOA');
   alunos_diario.SQL.Add('and aluno_turma_materia.ID_ALUNO_TURMA = aluno_turma.ID_ALUNO_TURMA');
-  alunos_diario.SQL.Add('and diario.ID_TURMA_MATERIA = aluno_turma_materia.ID_TURMA_MATERIA');
-  alunos_diario.SQL.Add('and diario.`DATA` between "' + data_inicio + '" and "' + data_fim + '"');
-  alunos_diario.SQL.Add('group by aluno.ID_ALUNO');
-  alunos_diario.SQL.Add('order by pessoa.NOME');
+  alunos_diario.SQL.Add('and aluno_turma_materia.ID_MATERIA  = ma.ID_MATERIA');
+  alunos_diario.SQL.Add('group by MA.ID_MATERIA, aluno.ID_ALUNO');
+  alunos_diario.SQL.Add('order by pessoa.NOME, diario.`DATA`');
 
+  self.Label3.Text := alunos_diario.SQL.Text;
 
   try
     alunos_diario.Open;
@@ -271,6 +285,21 @@ begin
         ShowMessage('Comando SQL não executado: ' + e.ToString);
         exit;
       end;
+  end;
+end;
+
+procedure TUnitConsultaFrequencia.SpGerarRelatorioClick(Sender: TObject);
+var
+  consulta: Tfrm_Consulta;
+  tipo_consulta: String;
+begin
+  consulta := Tfrm_Consulta.Create(Application);
+  tipo_consulta := self.Label3.Text;
+
+  case self.CbTipoRelatorio.ItemIndex of
+    1: consulta.getHtmlByQuery(tipo_consulta);
+    2: consulta.getWordByQuery(tipo_consulta);
+    3: consulta.getTxtByQuery(tipo_consulta);
   end;
 end;
 

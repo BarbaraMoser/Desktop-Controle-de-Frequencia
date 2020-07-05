@@ -11,12 +11,13 @@ type TConsulta = class
   private
     titulo:string;
     textosql:string;
+    tabela: string;
     retorno: string;
     colunaRetorno:integer;
     utilitario : Tutilitario;
     consulta: TConsulta;
   public
-    constructor create;
+    constructor create(tabela: String) overload; virtual;
     destructor destroi;
     procedure setTitulo(titulo:string);
     function getTitulo:string;
@@ -37,9 +38,10 @@ implementation
 
 uses unit_Consulta;
 
-constructor TConsulta.create;
+constructor TConsulta.create(tabela: String);
 begin
   Utilitario := Tutilitario.Create;
+  self.tabela := tabela;
 end;
 
 destructor TConsulta.destroi;
@@ -116,6 +118,7 @@ begin
   frm_consulta.StGridConsultaHeaderClick(frm_Consulta.StGridConsulta.ColumnByIndex(0));
   frm_consulta.edPalavraChaveChangeTracking(frm_Consulta.edPalavraChave);
   frm_consulta.edPalavraChave.SetFocus;
+  frm_Consulta.LbSQLConsulta.Text := self.getTextosql;
   Utilitario.ajustaTamnhosg(frm_Consulta.StGridConsulta);
 
   if (frm_consulta.ShowModal = mrOk) then

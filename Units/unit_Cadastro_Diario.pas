@@ -41,7 +41,7 @@ type
   private
     utilitario : Tutilitario;
   public
-    { Public declarations }
+    procedure setProfessorPorMateria;
   end;
 
 var
@@ -113,6 +113,8 @@ var
   aluno_turma: TFDQuery;
   i:integer;
 begin
+  self.setProfessorPorMateria;
+
   aluno_turma := TFDQuery.Create(nil);
   aluno_turma.Connection := dm_BancoDados.FDEscola;
   aluno_turma.Close;
@@ -192,17 +194,10 @@ end;
 procedure TUnitCadastroDiario.FormCreate(Sender: TObject);
 var
   curso: TFDQuery;
-  professor: TFDQuery;
 begin
-  Utilitario := Tutilitario.Create;
+  self.Calendar1.Date := now;
 
-  CbProfessor.Clear;
-  professor := TFDQuery.Create(nil);
-  professor.Connection := dm_BancoDados.FDEscola;
-  professor.Close;
-  professor.SQL.Clear;
-  professor.SQL.Add('select * from pessoa, professor');
-  professor.SQL.Add('where pessoa.id_pessoa = professor.id_pessoa');
+  Utilitario := Tutilitario.Create;
 
   cbCurso.Clear;
   curso := TFDQuery.Create(nil);
@@ -213,18 +208,11 @@ begin
 
   try
     curso.Open;
-    professor.Open;
 
     while not curso.Eof do
       begin
         cbCurso.Items.Objects[cbCurso.Items.Add(curso.FieldByName('nome').AsString)] := TObject(curso.FieldByName('id_curso').AsInteger);
         curso.Next;
-      end;
-
-    while not professor.Eof do
-      begin
-        CbProfessor.Items.Objects[CbProfessor.Items.Add(professor.FieldByName('nome').AsString)] := TObject(professor.FieldByName('id_professor').AsInteger);
-        professor.Next;
       end;
 
   except
@@ -235,6 +223,38 @@ begin
      end;
   end;
 
+end;
+
+procedure TUnitCadastroDiario.setProfessorPorMateria;
+var
+  professor: TFDQuery;
+begin
+  CbProfessor.Clear;
+  professor := TFDQuery.Create(nil);
+  professor.Connection := dm_BancoDados.FDEscola;
+  professor.Close;
+  professor.SQL.Clear;
+  professor.SQL.Add('select pr.ID_PROFESSOR as ID, pe.NOME as NOME from materia, pessoa as pe, professor as pr');
+  professor.SQL.Add('where materia.ID_MATERIA = ' + IntToStr(Integer(CbMateria.Items.Objects[CbMateria.ItemIndex])));
+  professor.SQL.Add('and materia.ID_PROFESSOR = pr.ID_PROFESSOR');
+  professor.SQL.Add('and pe.id_pessoa = pr.id_pessoa');
+
+  try
+    professor.Open;
+
+    while not professor.Eof do
+      begin
+        CbProfessor.Items.Objects[CbProfessor.Items.Add(professor.FieldByName('nome').AsString)] := TObject(professor.FieldByName('id').AsInteger);
+        professor.Next;
+      end;
+
+  except
+    on e:exception do
+     begin
+          ShowMessage('Comando SQL não executado: ' + e.ToString);
+          exit;
+     end;
+  end;
 end;
 
 procedure TUnitCadastroDiario.spVoltarPrincipalClick(Sender: TObject);

@@ -1,0 +1,54 @@
+unit unit_Cons_Frequencias;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, System.Rtti,
+  FMX.Grid.Style, FMX.StdCtrls, FMX.ListBox, FMX.Layouts,
+  FMX.Controls.Presentation, FMX.ScrollBox, FMX.Grid, FMX.Edit, FMX.Memo, Consulta,
+  unit_Cadastro_Pessoas, DBClient, FireDAC.Comp.Client, StrUtils, unit_Tipo_Consultas,
+  FMX.DateTimeCtrls;
+
+type
+  Tfrm_Cons_Frequencias = class(TForm)
+    Panel1: TPanel;
+    Panel5: TPanel;
+    Label6: TLabel;
+    Panel2: TPanel;
+    spVoltarPrincipal: TSpeedButton;
+    StGridConsulta: TStringGrid;
+    ImageControl1: TImageControl;
+    LbCampoPesquisa: TLabel;
+    LbCurso: TLabel;
+    cbCurso: TComboBox;
+    CbTurma: TComboBox;
+    LbTurma: TLabel;
+    dtDataNasc: TDateEdit;
+    DateEdit1: TDateEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    procedure spVoltarPrincipalClick(Sender: TObject);
+
+  private
+    // TODO
+  public
+    // TODO
+  end;
+
+var
+  frm_Cons_Frequencias: Tfrm_Cons_Frequencias;
+
+implementation
+
+{$R *.fmx}
+
+uses unit_BancoDados, Utilitario, Pessoa;
+
+procedure Tfrm_Cons_Frequencias.spVoltarPrincipalClick(Sender: TObject);
+begin
+  self.Close;
+end;
+
+
+end.

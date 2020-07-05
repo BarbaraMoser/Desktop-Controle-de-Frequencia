@@ -1,0 +1,32 @@
+unit Pessoa;
+
+interface
+uses Cadastro;
+
+type TPessoa = class(TCadastro)
+   private
+    id: integer;
+    nome: string;
+    cpf: string;
+    dt_nasc: TDateTime;
+    tipo_pessoa: integer;
+   public
+    procedure set_id(id:integer);
+    procedure set_nome(nome:string);
+end;
+
+implementation
+
+{ TPessoa }
+
+procedure TPessoa.set_id(id: integer);
+begin
+  self.id := id;
+end;
+
+procedure TPessoa.set_nome(nome: string);
+begin
+  self.nome := nome;
+end;
+
+end.

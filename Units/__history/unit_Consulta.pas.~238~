@@ -1,0 +1,485 @@
+unit unit_Consulta;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, System.Rtti,
+  FMX.Grid.Style, FMX.StdCtrls, FMX.ListBox, FMX.Layouts,
+  FMX.Controls.Presentation, FMX.ScrollBox, FMX.Grid, FMX.Edit, FMX.Memo, Consulta,
+  unit_Cadastro_Pessoas, DBClient, FireDAC.Comp.Client, StrUtils, unit_Tipo_Consultas,
+  comobj, FMX.Objects;
+
+type
+  Tfrm_Consulta = class(TForm)
+    Panel1: TPanel;
+    edPalavraChave: TEdit;
+    Label1: TLabel;
+    Panel5: TPanel;
+    Label6: TLabel;
+    Panel2: TPanel;
+    spVoltarPrincipal: TSpeedButton;
+    StGridConsulta: TStringGrid;
+    ImageControl1: TImageControl;
+    SpBtAbrirRegistro: TSpeedButton;
+    Label2: TLabel;
+    LbCampoPesquisa: TLabel;
+    LbSQLConsulta: TLabel;
+    SpBLbGerarRelatorioHtml: TSpeedButton;
+    CbTipoRelatorio: TComboBox;
+    SpGerarRelatorio: TSpeedButton;
+    procedure SpLimparConsultaClick(Sender: TObject);
+    procedure spVoltarPrincipalClick(Sender: TObject);
+    procedure SpBtAbrirRegistroClick(Sender: TObject);
+    procedure edPalavraChaveChangeTracking(Sender: TObject);
+    procedure StGridConsultaHeaderClick(Column: TColumn);
+    procedure StGridConsultaCellDblClick(const Column: TColumn; const Row: Integer);
+    procedure LbGerarRelatorioHtmlClick(Sender: TObject);
+    procedure SpGerarRelatorioClick(Sender: TObject);
+  private
+    iColPesq:integer;
+    qrCadastro: TFDQuery;
+    function getSelectRelatorio(slq: String): TFDQuery;
+  public
+    consulta: TConsulta;
+    procedure setiColPesq(iColPesq:integer);
+    function getiColPesq:integer;
+    procedure setConsulta(consulta: TConsulta);
+    procedure getHtmlByQuery(sql:String);
+    procedure getExcelByQuery(sql:String);
+    procedure getWordByQuery(sql:String);
+    procedure getTxtByQuery(sql:String);
+  end;
+
+var
+  frm_Consulta: Tfrm_Consulta;
+
+implementation
+
+{$R *.fmx}
+
+uses unit_BancoDados, Utilitario, Pessoa;
+
+procedure Tfrm_Consulta.edPalavraChaveChangeTracking(Sender: TObject);
+var
+  i: Integer;
+begin
+  if edPalavraChave.Text <> '' then
+    begin
+      for i:= StGridConsulta.RowCount - 1 downto 0 do
+        begin
+          if (AnsiStartsStr(AnsiUpperCase(edPalavraChave.TexT), AnsiUpperCase(StGridConsulta.Cells[self.getiColPesq,i]))) then
+            StGridConsulta.Row:= i;
+        end;
+    end
+  else
+    StGridConsulta.Row:= 0;
+end;
+
+
+procedure Tfrm_Consulta.getExcelByQuery(sql: String);
+var
+  i, j, iLinha:integer;
+  Excel: Variant;
+  slTipos:tStringList;
+  qrCadastro:TFDQuery;
+begin
+  qrCadastro := self.getSelectRelatorio(sql);
+
+  if (qrCadastro.IsEmpty) then
+   exit;
+
+
+  try
+    Excel:= CreateOleObject('Excel.Application');
+  except
+    ShowMessage ('Versão do MS - Excel Incompatível');
+  end;
+
+  Excel.Visible := True;
+
+  try
+    Excel.Documents.Add;
+    iLinha := 1;
+
+    Excel.Workbooks[1].Sheets[1].Add;
+
+    for i := 0 to qrCadastro.FieldCount - 1 do
+      begin
+        Excel.WorkBooks[1].Sheets[1].Cells[iLinha,0].Font.Name := 'Courier New';
+        Excel.WorkBooks[1].Sheets[1].Cells[iLinha,0].Font.Size := 10;
+        Excel.WorkBooks[1].Sheets[1].Cells[iLinha,0].Font.Bold := True;
+        Excel.WorkBooks[1].Sheets[1].Cells[iLinha,0] := qrCadastro.Fields[i].FieldName;
+
+        iLinha := iLinha + 1;
+      end;
+
+    if (qrCadastro.FieldCount > 0) then
+      begin
+        iLinha := iLinha + 2;
+
+        for i := 0 to qrCadastro.FieldCount - 1 do
+          begin
+            Excel.WorkBooks[1].Sheets[1].Cells[iLinha,i+1].Font.Name := 'Courier New';
+            Excel.WorkBooks[1].Sheets[1].Cells[iLinha,i+1].Font.Size := 10;
+            Excel.WorkBooks[1].Sheets[1].Cells[iLinha,i+1].Font.Bold := True;
+            Excel.WorkBooks[1].Sheets[1].Cells[iLinha,i+1] := qrCadastro.Fields[i].FieldName;
+          end;
+      end;
+
+    iLinha := iLinha + 1;
+    qrCadastro.First;
+    while (not qrCadastro.Eof) do
+      begin
+        For i := 0 to qrCadastro.FieldCount - 1 do
+          Excel.WorkBooks[1].Sheets[1].Cells[iLinha,i+1] := '=("' + qrCadastro.Fields[i].AsString + '")';
+
+        iLinha := iLinha + 1;
+        qrCadastro.Next;
+      end;
+
+    Excel.Columns.AutoFit;
+    Excel.Visible := True;
+
+    if not Excel.Visible then
+       begin
+         Excel.WorkBooks[1].SaveAs(GetCurrentDir + '\getExelByQuery.xls');
+         Excel.WorkBooks[1].Close;
+         ShowMessage(pChar('Arquivo ' + GetCurrentDir + '\getExelByQuery.xls' + ' salvo com sucesso!'));
+       end;
+    Excel:= Unassigned;
+  except
+    ShowMessage ('Versão do MS - Excel Incompatível');
+  end;
+
+
+//  try
+//    Excel := GetActiveOleObject('Excel.Application');
+//  except
+//    ShowMessage ('Versão do Ms-Excel Incompatível');
+//  end;
+//
+//  Excel.Workbooks.Add;
+//  iLinha := 1;
+//
+//  Excel.Workbooks[1].Sheets.Add;
+//
+//  for i := 0 to qrCadastro.FieldCount - 1 do
+//    begin
+//      Excel.WorkBooks[1].Sheets[1].Cells[iLinha,0].Font.Name := 'Courier New';
+//      Excel.WorkBooks[1].Sheets[1].Cells[iLinha,0].Font.Size := 10;
+//      Excel.WorkBooks[1].Sheets[1].Cells[iLinha,0].Font.Bold := True;
+//      Excel.WorkBooks[1].Sheets[1].Cells[iLinha,0] := qrCadastro.Fields[i].FieldName;
+//
+//      iLinha := iLinha + 1;
+//    end;
+//
+//  if (qrCadastro.FieldCount > 0) then
+//    begin
+//      iLinha := iLinha + 2;
+//
+//      for i := 0 to qrCadastro.FieldCount - 1 do
+//        begin
+//          Excel.WorkBooks[1].Sheets[1].Cells[iLinha,i+1].Font.Name := 'Courier New';
+//          Excel.WorkBooks[1].Sheets[1].Cells[iLinha,i+1].Font.Size := 10;
+//          Excel.WorkBooks[1].Sheets[1].Cells[iLinha,i+1].Font.Bold := True;
+//          Excel.WorkBooks[1].Sheets[1].Cells[iLinha,i+1] := qrCadastro.Fields[i].FieldName;
+//        end;
+//    end;
+//
+//  iLinha := iLinha + 1;
+//  qrCadastro.First;
+//  while (not qrCadastro.Eof) do
+//    begin
+//      For i := 0 to qrCadastro.FieldCount - 1 do
+//        Excel.WorkBooks[1].Sheets[1].Cells[iLinha,i+1] := '=("' + qrCadastro.Fields[i].AsString + '")';
+//
+//      iLinha := iLinha + 1;
+//      qrCadastro.Next;
+//    end;
+//
+//  Excel.Columns.AutoFit;
+//  Excel.Visible := True;
+//
+//  if not Excel.Visible then
+//     begin
+//       Excel.WorkBooks[1].SaveAs(GetCurrentDir + '\getExelByQuery.xls');
+//       Excel.WorkBooks[1].Close;
+//       ShowMessage(pChar('Arquivo ' + GetCurrentDir + '\getExelByQuery.xls' + ' salvo com sucesso!'));
+//     end;
+//  Excel:= Unassigned;
+  qrCadastro.Free;
+end;
+
+procedure Tfrm_Consulta.getHtmlByQuery(sql: String);
+var
+   htmlfile: TextFile;
+   i:integer;
+   linha, data:string;
+   qrCadastro:TFDQuery;
+const
+  wrap=#13+#10; //constante com o valor da tecla enter
+  alinhamento = '<td align="left">'; //constsnte para alinhamento
+begin
+  qrCadastro := self.getSelectRelatorio(sql);
+
+  if (qrCadastro.IsEmpty) then
+   exit;
+
+  data := DateToStr(now);
+
+  AssignFile(htmlFile, GetCurrentDir + '\infos_' + qrCadastro.Table.Name + '_' + data + '.html');
+  Rewrite(htmlFile);
+  Writeln(htmlfile, '<html><head>' + wrap +
+                      '<title>Relatório</title>' + wrap +
+                      '</head>' + wrap +
+                      '<body bgcolor="#FFFFFF">' + wrap +
+                      '<p align="center"><b><font face="Courier New" size="3">');
+  //Título geral
+  Writeln(htmlfile,'Busca de dados<br>');
+
+  Writeln(htmlfile,'</font></b></p>');
+  Writeln(htmlfile,'<table border="1" bordercolor="#000000" align="center" cellspacing="0" cellpadding="0">' + wrap);
+  Writeln(htmlfile,'<tr>');
+
+  //Títulos da Tabela
+  for i := 0 to qrCadastro.FieldCount - 1 do
+    begin
+         Writeln(htmlfile,'<td bgcolor="#CCCCCC" align="center"><b><font face="Courier New" size="2">' + qrCadastro.Fields[i].FieldName + '</font></b></td>');
+    end;
+
+  Writeln(htmlfile,'</tr>');
+
+  //Valores da tabela
+  qrCadastro.First;
+  while (not qrCadastro.Eof) do
+   begin
+        linha:='<tr>'+wrap;
+        for i := 0 to qrCadastro.FieldCount - 1 do
+          begin
+               if qrCadastro.Fields[i].AsString = '' then
+                  linha := linha + alinhamento + '<font face="Courier New" size="2">' + '&nbsp<br>'
+               else
+                   linha := linha + alinhamento + '<font face="Courier New" size="2">' + qrCadastro.Fields[i].AsString + '<br>';
+          end;
+        Writeln(htmlfile, linha);
+        Writeln(htmlfile, '</tr>');
+        qrCadastro.next;
+   end;
+
+  writeln(htmlfile,'</font></b></p>');
+  writeln(htmlfile, '</body></html>');
+  CloseFile(htmlfile);
+  ShowMessage('Arquivo ' + GetCurrentDir + '\infos_' + qrCadastro.Table.Name + '.html salvo com sucesso!');
+  FreeAndNil(qrCadastro);
+end;
+
+function Tfrm_Consulta.getiColPesq: integer;
+begin
+  result := self.iColPesq;
+end;
+
+function Tfrm_Consulta.getSelectRelatorio(slq: String): TFDQuery;
+var
+  consulta: TFDQuery;
+begin
+  consulta := TFDQuery.Create(nil);
+  consulta.Connection := dm_BancoDados.FDEscola;
+  consulta.Close;
+  consulta.SQL.Clear;
+  consulta.SQL.Add(slq);
+
+  try
+    consulta.Open;
+    result := consulta;
+  except
+     on e:exception do
+        begin
+             raise Exception.CreateFmt('Não foi possível executar operação no Banco.' + #10#13 + '%s', [E.Message]);
+        end;
+  end;
+end;
+
+procedure Tfrm_Consulta.getTxtByQuery(sql: String);
+var
+  Arq: TextFile;
+  i: Integer;
+  qrCadastro:TFDQuery;
+  sAux: String;
+begin
+  qrCadastro := self.getSelectRelatorio(sql);
+
+  if (qrCadastro.IsEmpty) then
+    exit;
+
+  try
+    AssignFile(Arq, GetCurrentDir + '\infos_' + qrCadastro.Table.Name + '.txt');
+    Rewrite(Arq);
+
+    sAux := '';
+
+    for i := 0 to qrCadastro.FieldCount - 1 do
+      sAux := sAux + qrCadastro.Fields[i].FieldName+'|';
+
+    Writeln(Arq, sAux);
+
+    qrCadastro.First;
+    while (not qrCadastro.Eof) do
+      begin
+        sAux:= '';
+        For i := 0 to qrCadastro.FieldCount - 1 do
+          sAux := sAux + qrCadastro.Fields[i].AsString + '|';
+
+        Writeln(Arq, sAux);
+        qrCadastro.Next;
+      end;
+
+    CloseFile(Arq);
+    ShowMessage(pChar('Arquivo ' +GetCurrentDir + '\infos_' + qrCadastro.Table.Name + '.txt salvo com sucesso!'));
+  except
+  end;
+end;
+
+procedure Tfrm_Consulta.getWordByQuery(sql: String);
+var
+  i:integer;
+  qrCadastro:TFDQuery;
+  MSWord: Variant;
+begin
+  qrCadastro := self.getSelectRelatorio(sql);
+
+  if (qrCadastro.IsEmpty) then
+   exit;
+
+  try
+    MSWord:= CreateOleObject('Word.Application');
+  except
+    ShowMessage ('Versão do MS - Word'+'Incompatível');
+  end;
+
+  MSWord.Visible := True;
+
+  try
+    MSWord.Documents.Add;
+
+    MSWord.Application.Selection.PageSetup.TopMargin := '1,02 cm';
+    MSWord.Application.Selection.PageSetup.BottomMargin := '2,49 cm';
+    MSWord.Application.Selection.PageSetup.LeftMargin := '1,5 cm';
+    MSWord.Application.Selection.PageSetup.RightMargin := '1,5 cm';
+
+    MSWord.Application.Selection.Font.Bold := true;
+    MSWord.Application.Selection.Font.Size := 12;
+    MSWord.Application.Selection.Font.Name := 'Courier New';
+    MSWord.Application.Selection.ParagraphFormat.Alignment := 1; //Centralizado
+    MSWord.Selection.TypeText(sql + #13);
+
+    MSWord.Application.Selection.TypeParagraph;
+    MSWord.Application.Selection.Font.Size := 10;
+    MSWord.Application.Selection.Font.Bold := false;
+
+    //Adiciona tabela
+    qrCadastro.Last; //Para contar o numero de registros
+    MSWord.ActiveDocument.Tables.Add(Range := MSWord.Selection.Range, NumRows := qrCadastro.RecordCount, NumColumns := qrCadastro.FieldCount);
+
+    if qrCadastro.FieldCount > 0 then
+      for i := 0 to qrCadastro.FieldCount - 1 do
+        begin
+          MSWord.Application.Selection.ParagraphFormat.Alignment := 1; //Centralizado
+          MSWord.Application.Selection.Font.Size := 10;
+          MSWord.Application.Selection.Font.Bold := true;
+          MSWord.Selection.TypeText(Text := qrCadastro.Fields[i].FieldName);
+          MSWord.Selection.MoveRight(12);
+        end;
+
+    MSWord.Application.Selection.Font.Bold := false;
+
+    qrCadastro.First;
+    while (not qrCadastro.Eof) do
+      begin
+        For i := 0 to qrCadastro.FieldCount - 1 do
+          begin
+            MSWord.Application.Selection.Font.Size := 10;
+            MSWord.Application.Selection.Font.Bold := false;
+            MSWord.Application.Selection.ParagraphFormat.Alignment := 0; //0 = centralizado 1 = esquerda 2 = Direita
+            MSWord.Selection.TypeText(Text := qrCadastro.Fields[i].AsString);
+
+            MSWord.Selection.MoveRight(12); // Próxima célula
+          end;
+        qrCadastro.Next;
+      end;
+
+    MSWord.Selection.Tables.Item(1).Select; // Seleciona a 1º tabela
+    MSWord.Selection.Cells.AutoFit; // Auto-formata
+
+    MSWord.Selection.MoveDown;
+    MSWord.Selection.MoveDown;
+
+    if not MSWord.Visible then
+      begin
+        MSWord.ActiveDocument.SaveAs(FileName := wideString(GetCurrentDir + '\infos_' + qrCadastro.Table.Name + '.docx')); // Para salvar...
+        MSWord.ActiveDocument.Close(SaveChanges := 0); // Fecha documento
+        MSWord.Quit; // Fecha o Word
+        ShowMessage(pChar('Arquivo ' + GetCurrentDir + '\infos_' + qrCadastro.Table.Name + '.docx salvo com sucesso!'));
+      end;
+  except
+  end;
+  FreeAndNil(qrCadastro);
+end;
+
+procedure Tfrm_Consulta.LbGerarRelatorioHtmlClick(Sender: TObject);
+begin
+  self.getHtmlByQuery(self.LbSQLConsulta.Text);
+end;
+
+procedure Tfrm_Consulta.setConsulta(consulta: TConsulta);
+begin
+  self.consulta := consulta;
+end;
+
+procedure Tfrm_Consulta.setiColPesq(iColPesq: integer);
+begin
+  self.iColPesq := iColPesq;
+end;
+
+procedure Tfrm_Consulta.SpBtAbrirRegistroClick(Sender: TObject);
+begin
+  ModalResult := mrOk;
+end;
+
+procedure Tfrm_Consulta.SpGerarRelatorioClick(Sender: TObject);
+var
+  tipo_consulta: String;
+begin
+  tipo_consulta := self.LbSQLConsulta.Text;
+
+  case self.CbTipoRelatorio.ItemIndex of
+    0: self.getHtmlByQuery(tipo_consulta);
+    1: self.getWordByQuery(tipo_consulta);
+    2: self.getTxtByQuery(tipo_consulta);
+  end;
+end;
+
+procedure Tfrm_Consulta.SpLimparConsultaClick(Sender: TObject);
+begin
+   self.consulta.Destroy();
+end;
+
+procedure Tfrm_Consulta.spVoltarPrincipalClick(Sender: TObject);
+begin
+  self.Close;
+end;
+
+procedure Tfrm_Consulta.StGridConsultaCellDblClick(const Column: TColumn; const Row: Integer);
+begin
+  SpBtAbrirRegistroClick(SpBtAbrirRegistro);
+end;
+
+procedure Tfrm_Consulta.StGridConsultaHeaderClick(Column: TColumn);
+begin
+  self.setiColPesq(Column.Index);
+  LbCampoPesquisa.Text := Column.Header;
+  edPalavraChave.Text := '';
+  edPalavraChave.SetFocus;
+end;
+
+end.

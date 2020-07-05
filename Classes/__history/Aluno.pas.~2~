@@ -1,0 +1,11 @@
+unit Aluno;
+interface
+uses Cadastro;
+
+type TAluno = class(TCadastro)
+
+end;
+
+implementation
+
+end.

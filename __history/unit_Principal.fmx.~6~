@@ -1,0 +1,61 @@
+object form_Principal: Tform_Principal
+  Left = 0
+  Top = 0
+  Caption = 'Projeto de escola'
+  ClientHeight = 480
+  ClientWidth = 640
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  DesignerMasterStyle = 0
+  object ListBox1: TListBox
+    Align = Client
+    Size.Width = 640.000000000000000000
+    Size.Height = 480.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    DisableFocusEffect = True
+    DefaultItemStyles.ItemStyle = ''
+    DefaultItemStyles.GroupHeaderStyle = ''
+    DefaultItemStyles.GroupFooterStyle = ''
+    Viewport.Width = 636.000000000000000000
+    Viewport.Height = 436.000000000000000000
+    object ListBoxItem1: TListBoxItem
+      Size.Width = 636.000000000000000000
+      Size.Height = 57.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object spCadastro: TSpeedButton
+        Align = Center
+        StyledSettings = [Family, Style, FontColor]
+        Images = dm_BancoDados.ImageList1
+        ImageIndex = 0
+        Size.Width = 170.000000000000000000
+        Size.Height = 37.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Cadastros'
+        TextSettings.Font.Size = 14.000000000000000000
+        TextSettings.HorzAlign = Leading
+        OnClick = spCadastroClick
+      end
+    end
+    object ListBoxHeader1: TListBoxHeader
+      Size.Width = 636.000000000000000000
+      Size.Height = 40.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      object Label1: TLabel
+        Align = Center
+        StyledSettings = [Family, Style]
+        Size.Width = 135.000000000000000000
+        Size.Height = 17.000000000000000000
+        Size.PlatformDefault = False
+        TextSettings.Font.Size = 14.000000000000000000
+        TextSettings.FontColor = claBlue
+        TextSettings.HorzAlign = Center
+        Text = 'Sistema de escola'
+        TabOrder = 0
+      end
+    end
+  end
+end

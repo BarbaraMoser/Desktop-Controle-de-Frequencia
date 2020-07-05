@@ -1,0 +1,259 @@
+unit unit_Cadastro_Pessoas;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
+  FMX.ListBox, FMX.DateTimeCtrls, FMX.Edit, FMX.Controls.Presentation,
+  FMX.ScrollBox, FMX.Memo, VCL.Imaging.Jpeg, FMX.Layouts, FMX.ExtCtrls,
+  FireDAC.Comp.Client, DBClient, Consulta, Pessoa, FMX.Objects, Vcl.Graphics;
+
+type
+  TUnitCadastroPessoas = class(TForm)
+    Panel1: TPanel;
+    Panel3: TPanel;
+    edNomeCompleto: TEdit;
+    LbNomeCompleto: TLabel;
+    edCpf: TEdit;
+    LbCpf: TLabel;
+    dtDataNasc: TDateEdit;
+    LbDataNascimento: TLabel;
+    cbTipoPessoa: TComboBox;
+    Label5: TLabel;
+    Panel4: TPanel;
+    btnSalvar: TSpeedButton;
+    Panel5: TPanel;
+    Label6: TLabel;
+    spVoltarPrincipal: TSpeedButton;
+    ImageControl1: TImageControl;
+    OpenDialogImagem: TOpenDialog;
+    SpbtBuscarImagem: TSpeedButton;
+    btnDeletar: TSpeedButton;
+    LbIdPessoa: TLabel;
+    TIimagemPessoa: TImage;
+    procedure btnSalvarClick(Sender: TObject);
+    procedure spVoltarPrincipalClick(Sender: TObject);
+    procedure SpbtBuscarImagemClick(Sender: TObject);
+    procedure btnDeletarClick(Sender: TObject);
+    procedure dtDataNascCanFocus(Sender: TObject; var ACanFocus: Boolean);
+    procedure edCpfCanFocus(Sender: TObject; var ACanFocus: Boolean);
+    procedure cbTipoPessoaCanFocus(Sender: TObject; var ACanFocus: Boolean);
+    procedure FormCreate(Sender: TObject);
+    procedure btnSalvarMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Single);
+  private
+    infoPessoa: TList;
+  public
+    foto:TBitmap;
+    function verificarPessoaBanco(cpf: String): TFDQuery;
+  end;
+
+var
+  UnitCadastroPessoas: TUnitCadastroPessoas;
+
+implementation
+
+{$R *.fmx}
+
+uses unit_BancoDados, Aluno, Professor, Foto, Cadastro, Utils;
+
+procedure TUnitCadastroPessoas.btnDeletarClick(Sender: TObject);
+var
+  pessoa:TPessoa;
+  slDadosPessoa:TStringList;
+  slDadosFoto:TStringList;
+begin
+  slDadosPessoa := TStringList.Create;
+  slDadosPessoa.Clear;
+  slDadosPessoa.Add(LbIdPessoa.Text);
+  slDadosPessoa.Add(edNomeCompleto.Text);
+  slDadosPessoa.Add(edCpf.Text);
+  slDadosPessoa.Add(DateToStr(dtDataNasc.Date));
+  slDadosPessoa.Add(IntToStr(cbTipoPessoa.ItemIndex));
+  slDadosPessoa.Add('0');
+
+  pessoa := TPessoa.Create('pessoa');
+  pessoa.update(slDadosPessoa);
+
+  pessoa.utilitario.LimpaTela(self);
+  edNomeCompleto.SetFocus;
+  ShowMessage('O cadastro foi deletado com sucesso!');
+  pessoa.Free;
+end;
+
+procedure TUnitCadastroPessoas.btnSalvarClick(Sender: TObject);
+var
+  pessoa:TPessoa;
+  aluno:TAluno;
+  professor:TProfessor;
+  slDadosPessoa:TStringList;
+  slDadosFoto:TStringList;
+  slDadosAluno:TStringList;
+  slDadosProfessor:TStringList;
+  tipo_pessoa, i: integer;
+  busca_id: TCadastro;
+  foto: TCadastro;
+  last_id:String;
+begin
+  if cbTipoPessoa.ItemIndex = 0 then
+      raise Exception.Create('É preciso selecionar um tipo de pessoa.');
+
+  slDadosPessoa := TStringList.Create;
+  slDadosPessoa.Clear;
+
+  if (self.verificarPessoaBanco(edCpf.Text).IsEmpty) then
+    begin
+      slDadosPessoa.Add('0');
+      slDadosPessoa.Add(edNomeCompleto.Text);
+      slDadosPessoa.Add(edCpf.Text);
+      slDadosPessoa.Add(DateToStr(dtDataNasc.Date));
+      slDadosPessoa.Add(IntToStr(cbTipoPessoa.ItemIndex));
+      slDadosPessoa.Add('1');
+
+      pessoa := TPessoa.Create('pessoa');
+      pessoa.estado := 0;
+      pessoa.insert(slDadosPessoa);
+      last_id := busca_id.buscarUltimoIdInserido();
+
+      if cbTipoPessoa.ItemIndex = 1 then
+        begin
+          slDadosProfessor := TStringList.Create;
+          slDadosProfessor.Clear;
+          slDadosProfessor.Add('0');
+          slDadosProfessor.Add(last_id);
+
+          professor := TProfessor.Create('professor');
+          professor.estado := 0;
+          professor.insert(slDadosProfessor);
+        end;
+      if cbTipoPessoa.ItemIndex = 2 then
+        begin
+          slDadosAluno := TStringList.Create;
+          slDadosAluno.Clear;
+          slDadosAluno.Add('0');
+          slDadosAluno.Add(last_id);
+
+          aluno := TAluno.Create('aluno');
+          aluno.estado := 0;
+          aluno.insert(slDadosAluno);
+        end;
+
+      foto := TCadastro.Create('foto');
+      foto.setImgFoto(StrToInt(last_id), OpenDialogImagem.FileName);
+      ShowMessage('O cadastro foi inserido com sucesso!');
+    end
+  else
+    begin
+      slDadosPessoa.Add(LbIdPessoa.Text);
+      slDadosPessoa.Add(edNomeCompleto.Text);
+      slDadosPessoa.Add(edCpf.Text);
+      slDadosPessoa.Add(DateToStr(dtDataNasc.Date));
+      slDadosPessoa.Add(IntToStr(cbTipoPessoa.ItemIndex));
+      slDadosPessoa.Add('1');
+
+      foto := TCadastro.Create('foto');
+      pessoa := TPessoa.Create('pessoa');
+
+      pessoa.update(slDadosPessoa);
+      foto.setImgFoto(StrToInt(LbIdPessoa.Text), OpenDialogImagem.FileName);
+      ShowMessage('O cadastro foi atualizado com sucesso!');
+    end;
+
+  pessoa.utilitario.LimpaTela(self);
+  TIimagemPessoa.Bitmap := nil;
+  dtDataNasc.TodayDefault := True;
+  edNomeCompleto.SetFocus;
+  FreeAndNil(pessoa);
+  FreeAndNil(aluno);
+  FreeAndNil(professor);
+  FreeAndNil(foto);
+end;
+
+
+procedure TUnitCadastroPessoas.cbTipoPessoaCanFocus(Sender: TObject;
+  var ACanFocus: Boolean);
+var
+  utils: TUtils;
+begin
+  utils.verificarDataNascimento(dtDataNasc.Date);
+
+  dtDataNasc.SetFocus;
+end;
+
+
+procedure TUnitCadastroPessoas.dtDataNascCanFocus(Sender: TObject; var ACanFocus: Boolean);
+var
+  utils: TUtils;
+begin
+  utils.validaCampoPreenchido(edCpf.Text, LbCpf.Text);
+
+  if not edCpf.Text.IsEmpty then
+    utils.verificaCpf(edCpf.Text);
+
+  edCpf.SetFocus;
+end;
+
+procedure TUnitCadastroPessoas.edCpfCanFocus(Sender: TObject; var ACanFocus: Boolean);
+var
+  utils: TUtils;
+begin
+  utils.validaCampoPreenchido(edNomeCompleto.Text, LbNomeCompleto.Text);
+
+  edNomeCompleto.SetFocus;
+end;
+
+procedure TUnitCadastroPessoas.FormCreate(Sender: TObject);
+begin
+  self.dtDataNasc.Date := now;
+end;
+
+procedure TUnitCadastroPessoas.SpbtBuscarImagemClick(Sender: TObject);
+var
+  foto: TCadastro;
+begin
+  TIimagemPessoa.Bitmap := nil;
+  OpenDialogImagem.Execute;
+  TIimagemPessoa.Bitmap.LoadFromFile(OpenDialogImagem.FileName);
+  TIimagemPessoa.Bitmap.Resize(113, 113);
+
+  if (OpenDialogImagem.FileName = '') then
+   OpenDialogImagem.FileName := GetCurrentDir +'\imagem.jpg';
+
+  foto := TCadastro.Create('foto');
+
+  try
+     TIimagemPessoa.Bitmap.SaveToFile(OpenDialogImagem.FileName);
+     TIimagemPessoa.Repaint;
+  except
+    on e:exception do
+      begin
+        TIimagemPessoa.Bitmap := nil;
+      end;
+  end;
+
+  FreeAndNil(foto);
+end;
+
+procedure TUnitCadastroPessoas.spVoltarPrincipalClick(Sender: TObject);
+begin
+  self.Close;
+end;
+
+function TUnitCadastroPessoas.verificarPessoaBanco(cpf: String): TFDQuery;
+var
+  consulta_pessoa: TFDQuery;
+begin
+  consulta_pessoa := TFDQuery.Create(nil);
+  consulta_pessoa.Connection := dm_BancoDados.FDEscola;
+  consulta_pessoa.Close;
+  consulta_pessoa.SQL.Clear;
+  consulta_pessoa.SQL.Add('select * from pessoa');
+  consulta_pessoa.SQL.Add('where cpf');
+  consulta_pessoa.SQL.Add('= "' + cpf + '" and ativo = 1');
+  consulta_pessoa.Open;
+
+  result := consulta_pessoa;
+end;
+
+end.

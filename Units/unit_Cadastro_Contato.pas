@@ -117,7 +117,7 @@ procedure TUnitCadastroContatos.btnSalvarMouseMove(Sender: TObject;
   Shift: TShiftState; X, Y: Single);
 begin
   if ((edEmail.Text.IsEmpty) and (EdTelefone.Text.IsEmpty)) or ((edEmail.Text.IsEmpty) and (EdCelular.Text.IsEmpty)) then
-    raise Exception.Create('Informe pelo menos um contato.')
+    raise Exception.Create('Informe pelo menos um contato.');
 end;
 
 function TUnitCadastroContatos.buscarPessoaPorId(id_pessoa: String):TFDQuery;

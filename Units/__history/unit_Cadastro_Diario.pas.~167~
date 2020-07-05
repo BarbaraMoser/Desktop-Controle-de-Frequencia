@@ -1,0 +1,282 @@
+unit unit_Cadastro_Diario;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
+  FMX.ListBox, FMX.DateTimeCtrls, FMX.Edit, FMX.Controls.Presentation,
+  FireDAC.Comp.Client, FMX.Layouts, unit_Cadastro_Curso_Materia, System.Rtti,
+  FMX.Grid.Style, FMX.ScrollBox, FMX.Grid, Utilitario, FMX.Calendar;
+
+type
+  TUnitCadastroDiario = class(TForm)
+    Panel1: TPanel;
+    Panel3: TPanel;
+    Panel4: TPanel;
+    btnSalvar: TSpeedButton;
+    Panel5: TPanel;
+    Label6: TLabel;
+    spVoltarPrincipal: TSpeedButton;
+    ImageControl1: TImageControl;
+    LbPeriodo: TLabel;
+    cbCurso: TComboBox;
+    Label1: TLabel;
+    CbTurma: TComboBox;
+    Label2: TLabel;
+    CbMateria: TComboBox;
+    StGridDiario: TStringGrid;
+    StNomeAluno: TStringColumn;
+    ScIdAlunoTurma: TStringColumn;
+    Label3: TLabel;
+    CbProfessor: TComboBox;
+    Calendar1: TCalendar;
+    procedure btnSalvarClick(Sender: TObject);
+    procedure spVoltarPrincipalClick(Sender: TObject);
+    procedure BtAdicionarMateriasCursoClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure CbMateriaChange(Sender: TObject);
+    procedure cbCursoChange(Sender: TObject);
+    procedure CbTurmaChange(Sender: TObject);
+  private
+    utilitario : Tutilitario;
+  public
+    procedure setProfessorPorMateria;
+  end;
+
+var
+  UnitCadastroDiario: TUnitCadastroDiario;
+
+implementation
+
+{$R *.fmx}
+
+uses unit_BancoDados, Curso, Curso_Materia, Consulta, unit_Registro_Frequencia;
+
+procedure TUnitCadastroDiario.BtAdicionarMateriasCursoClick(Sender: TObject);
+var
+  cad_materia_curso: TUnitCadastroCursoMaterias;
+begin
+  cad_materia_curso := TUnitCadastroCursoMaterias.Create(Application);
+  cad_materia_curso.showmodal;
+end;
+
+procedure TUnitCadastroDiario.btnSalvarClick(Sender: TObject);
+var
+  frequencia: TUnitRegistroFrequencia;
+  aluno, id_aluno_turma, id_professor: string;
+begin
+  aluno := StGridDiario.Cells[0, StGridDiario.Row];
+  id_aluno_turma := StGridDiario.Cells[1, StGridDiario.Row];
+  id_professor := IntToStr(Integer(CbProfessor.Items.Objects[CbProfessor.ItemIndex]));
+
+  frequencia := TUnitRegistroFrequencia.Create(Application);
+  frequencia.setDados(id_aluno_turma, id_professor, aluno, DateToStr(Calendar1.Date));
+  frequencia.ShowModal;
+end;
+
+procedure TUnitCadastroDiario.cbCursoChange(Sender: TObject);
+var
+  turma: TFDQuery;
+begin
+  CbTurma.Clear;
+  turma := TFDQuery.Create(nil);
+  turma.Connection := dm_BancoDados.FDEscola;
+  turma.Close;
+  turma.SQL.Clear;
+  turma.SQL.Add('select * from turma, aluno_turma');
+  turma.SQL.Add('where aluno_turma.id_curso = ' + IntToStr(Integer(cbCurso.Items.Objects[cbCurso.ItemIndex])));
+  turma.SQL.Add('and turma.id_turma = aluno_turma.id_turma');
+  turma.SQL.Add('group by aluno_turma.id_turma');
+
+  try
+    turma.Open;
+
+    while (not turma.Eof) do
+      begin
+        CbTurma.Items.Objects[CbTurma.Items.Add(turma.FieldByName('descricao').AsString)] := TObject(turma.FieldByName('id_turma').AsInteger);
+        turma.Next;
+      end;
+
+  except
+    on e:exception do
+     begin
+          ShowMessage('Comando SQL não executado: ' + e.ToString);
+          exit;
+     end;
+  end;
+
+end;
+
+procedure TUnitCadastroDiario.CbMateriaChange(Sender: TObject);
+var
+  aluno_turma: TFDQuery;
+  i:integer;
+begin
+  self.setProfessorPorMateria;
+
+  aluno_turma := TFDQuery.Create(nil);
+  aluno_turma.Connection := dm_BancoDados.FDEscola;
+  aluno_turma.Close;
+  aluno_turma.SQL.Clear;
+  aluno_turma.SQL.Add('select pessoa.NOME, aluno_turma_materia.ID_TURMA_MATERIA from aluno_turma, pessoa, aluno, aluno_turma_materia');
+  aluno_turma.SQL.Add('where aluno_turma_materia.ID_MATERIA = ' + IntToStr(Integer(CbMateria.Items.Objects[CbMateria.ItemIndex])));
+  aluno_turma.SQL.Add('and aluno_turma.ID_ALUNO_TURMA = aluno_turma_materia.ID_ALUNO_TURMA');
+  aluno_turma.SQL.Add('and aluno.ID_ALUNO = aluno_turma.ID_ALUNO');
+  aluno_turma.SQL.Add('and pessoa.ID_PESSOA = aluno.ID_PESSOA');
+  aluno_turma.SQL.Add('group by aluno.ID_ALUNO;');
+
+  try
+    aluno_turma.Open;
+
+    if (not aluno_turma.IsEmpty) then
+      begin
+        utilitario.LimpaStringGrid(StGridDiario);
+        aluno_turma.First;
+
+        while (not aluno_turma.Eof) do
+          begin
+            if (StGridDiario.Cells[0,0] <> '') then
+              StGridDiario.RowCount := StGridDiario.RowCount + 1;
+
+            for i := 0 to aluno_turma.FieldCount -1 do
+              StGridDiario.Cells[i, StGridDiario.RowCount -1] := aluno_turma.Fields[i].AsString;
+
+            aluno_turma.Next;
+          end;
+      end;
+
+  except
+    on e:exception do
+      begin
+        ShowMessage('Comando SQL não executado: ' + e.ToString);
+        exit;
+      end;
+  end;
+
+  aluno_turma.Close;
+  FreeAndNil(aluno_turma);
+end;
+
+procedure TUnitCadastroDiario.CbTurmaChange(Sender: TObject);
+var
+  materia: TFDQuery;
+begin
+  CbMateria.Clear;
+  materia := TFDQuery.Create(nil);
+  materia.Connection := dm_BancoDados.FDEscola;
+  materia.Close;
+  materia.SQL.Clear;
+  materia.SQL.Add('select * from materia, curso_materia, aluno_turma');
+  materia.SQL.Add('where aluno_turma.id_turma = ' + IntToStr(Integer(CbTurma.Items.Objects[CbTurma.ItemIndex])));
+  materia.SQL.Add('and aluno_turma.id_curso = curso_materia.id_curso');
+  materia.SQL.Add('and curso_materia.id_materia = materia.id_materia');
+  materia.SQL.Add('group by curso_materia.id_materia');
+
+  try
+    materia.Open;
+
+    while not materia.Eof do
+      begin
+        CbMateria.Items.Objects[CbMateria.Items.Add(materia.FieldByName('nome').AsString)] := TObject(materia.FieldByName('id_materia').AsInteger);
+        materia.Next;
+      end;
+
+  except
+    on e:exception do
+     begin
+          ShowMessage('Comando SQL não executado: ' + e.ToString);
+          exit;
+     end;
+  end;
+end;
+
+procedure TUnitCadastroDiario.FormCreate(Sender: TObject);
+var
+  curso: TFDQuery;
+  professor: TFDQuery;
+begin
+  self.Calendar1.Date := now;
+
+  Utilitario := Tutilitario.Create;
+
+  CbProfessor.Clear;
+  professor := TFDQuery.Create(nil);
+  professor.Connection := dm_BancoDados.FDEscola;
+  professor.Close;
+  professor.SQL.Clear;
+  professor.SQL.Add('select * from pessoa, professor');
+  professor.SQL.Add('where pessoa.id_pessoa = professor.id_pessoa');
+
+  cbCurso.Clear;
+  curso := TFDQuery.Create(nil);
+  curso.Connection := dm_BancoDados.FDEscola;
+  curso.Close;
+  curso.SQL.Clear;
+  curso.SQL.Add('select * from curso');
+
+  try
+    curso.Open;
+    professor.Open;
+
+    while not curso.Eof do
+      begin
+        cbCurso.Items.Objects[cbCurso.Items.Add(curso.FieldByName('nome').AsString)] := TObject(curso.FieldByName('id_curso').AsInteger);
+        curso.Next;
+      end;
+
+    while not professor.Eof do
+      begin
+        CbProfessor.Items.Objects[CbProfessor.Items.Add(professor.FieldByName('nome').AsString)] := TObject(professor.FieldByName('id_professor').AsInteger);
+        professor.Next;
+      end;
+
+  except
+    on e:exception do
+     begin
+          ShowMessage('Comando SQL não executado: ' + e.ToString);
+          exit;
+     end;
+  end;
+
+end;
+
+procedure TUnitCadastroDiario.setProfessorPorMateria;
+var
+  professor: TFDQuery;
+begin
+  CbProfessor.Clear;
+  professor := TFDQuery.Create(nil);
+  professor.Connection := dm_BancoDados.FDEscola;
+  professor.Close;
+  professor.SQL.Clear;
+  professor.SQL.Add('select * from materia, pessoa, professor');
+  professor.SQL.Add('where materia.ID_MATERIA = ' + IntToStr(Integer(CbMateria.Items.Objects[CbMateria.ItemIndex])));
+  professor.SQL.Add('and materia.ID_PROFESSOR = professor.ID_PROFESSOR');
+  professor.SQL.Add('and pessoa.id_pessoa = professor.id_pessoa');
+
+
+  try
+    professor.Open;
+
+    while not professor.Eof do
+      begin
+        CbProfessor.Items.Objects[CbProfessor.Items.Add(professor.FieldByName('nome').AsString)] := TObject(professor.FieldByName('id_professor').AsInteger);
+        professor.Next;
+      end;
+
+  except
+    on e:exception do
+     begin
+          ShowMessage('Comando SQL não executado: ' + e.ToString);
+          exit;
+     end;
+  end;
+end;
+
+procedure TUnitCadastroDiario.spVoltarPrincipalClick(Sender: TObject);
+begin
+  self.Close;
+end;
+
+end.

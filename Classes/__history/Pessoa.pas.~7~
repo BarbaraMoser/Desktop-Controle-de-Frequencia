@@ -1,0 +1,19 @@
+unit Pessoa;
+
+interface
+uses Cadastro;
+
+type TPessoa = class(TCadastro)
+   private
+    id: integer;
+    nome: string;
+    cpf: string;
+    dt_nasc: TDateTime;
+    tipo_pessoa: integer;
+   public
+
+end;
+
+implementation
+
+end.

@@ -1,0 +1,80 @@
+unit unit_Cadastro;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
+  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.StdCtrls,
+  FMX.ListBox, FMX.DateTimeCtrls, FMX.Edit, FMX.Controls.Presentation;
+
+type
+  TUnitCadastro = class(TForm)
+    Panel1: TPanel;
+    Panel3: TPanel;
+    edNomeCompleto: TEdit;
+    Label2: TLabel;
+    edCpf: TEdit;
+    Label3: TLabel;
+    dtDataNasc: TDateEdit;
+    Label4: TLabel;
+    cbTipoPessoa: TComboBox;
+    Label5: TLabel;
+    Panel4: TPanel;
+    btnSalvar: TSpeedButton;
+    Panel5: TPanel;
+    Label6: TLabel;
+    spVoltarPrincipal: TSpeedButton;
+    procedure btnSalvarClick(Sender: TObject);
+    procedure spVoltarPrincipalClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  UnitCadastro: TUnitCadastro;
+
+implementation
+
+{$R *.fmx}
+
+uses unit_BancoDados, Pessoa, Aluno;
+
+procedure TUnitCadastro.btnSalvarClick(Sender: TObject);
+var
+  pessoa:TPessoa;
+  aluno:TAluno;
+  slDados:TStringList;
+  resultado, tipo_pessoa: integer;
+begin
+  slDados := TStringList.Create;
+  slDados.Clear;
+  slDados.Add('0');
+  slDados.Add(edNomeCompleto.Text);
+  slDados.Add(edCpf.Text);
+  slDados.Add(DateToStr(dtDataNasc.Date));
+  slDados.Add(IntToStr(cbTipoPessoa.ItemIndex));
+
+  pessoa := TPessoa.Create('pessoa');
+  pessoa.estado := 0;
+  pessoa.insert(slDados);
+  if (cbTipoPessoa.ItemIndex = 1) then
+    begin
+      aluno := TAluno.Create('aluno');
+      aluno.estado := 0;
+      aluno.insert(slDados);
+      aluno.Free;
+    end;
+
+  pessoa.utilitario.LimpaTela(self);
+  edNomeCompleto.SetFocus;
+  pessoa.Free;
+end;
+
+procedure TUnitCadastro.spVoltarPrincipalClick(Sender: TObject);
+begin
+  self.Close;
+end;
+
+end.

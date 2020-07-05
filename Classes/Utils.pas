@@ -12,8 +12,9 @@ type TUtils = class
      id: integer;
      procedure verificaCpf(cpf: String);
      procedure validaCampoPreenchido(valor: String; nome_campo: String);
-     procedure verificarDataNascimento(data: TDateTime; campo: TDateEdit);
+     procedure verificarDataNascimento(data: TDateTime);
      procedure validaEmail(email: String);
+     procedure validarDatas(dtInicio: TDateTime; dtFim: TDateTime; campo: TDateEdit);
 end;
 
 
@@ -84,11 +85,14 @@ begin
       Result := False;
 end;
 
-procedure TUtils.verificarDataNascimento(data: TDateTime; campo: TDateEdit);
+procedure TUtils.verificarDataNascimento(data: TDateTime);
+var
+  today: TDateTime;
 begin
-  if data >= now then
-    campo.IsEmpty := True;
-    raise Exception.Create('Data de Nascimento incorreta.')
+  today := now -1;
+
+  if not (data < today) then
+    raise Exception.Create('Data de Nascimento não pode ser igual a data de hoje.')
 end;
 
 procedure TUtils.validaCampoPreenchido(valor, nome_campo: String);
@@ -105,6 +109,12 @@ procedure TUtils.validaEmail(email: String);
 begin
   if self.verificaEmail(email) = False then
     raise Exception.Create('O email deve ser válido.')
+end;
+
+procedure TUtils.validarDatas(dtInicio, dtFim: TDateTime; campo: TDateEdit);
+begin
+  if not (dtInicio < dtFim) then
+    raise Exception.Create('A data fim deve ser maior que a data de início.')
 end;
 
 function TUtils.calculoCpf(cpf: String): boolean;

@@ -24,18 +24,19 @@ type
     cbPeriodo: TComboBox;
     LbMateriaSalvas: TListBox;
     Label1: TLabel;
+    LbProfessorMateria: TLabel;
+    CbProfessorPeriodo: TComboBox;
     procedure btnSalvarClick(Sender: TObject);
     procedure spVoltarPrincipalClick(Sender: TObject);
     procedure edNomeMateriaCanFocus(Sender: TObject; var ACanFocus: Boolean);
     procedure FormCreate(Sender: TObject);
-    procedure btnSalvarMouseMove(Sender: TObject; Shift: TShiftState; X,
-      Y: Single);
   private
     function getMateriasCadastradas: TFDQuery;
     procedure setPeriodos;
+    procedure setProfessor;
     procedure setMateriasSalvas;
   public
-    { Public declarations }
+    procedure validarPeriodoSelecionado;
   end;
 
 var
@@ -53,30 +54,23 @@ var
   slDados:TStringList;
   i, periodo:integer;
 begin
+  self.validarPeriodoSelecionado;
+
   slDados := TStringList.Create;
   slDados.Clear;
   slDados.Add('0');
   slDados.Add(IntToStr(Integer(cbPeriodo.Items.Objects[cbPeriodo.ItemIndex])));
+  slDados.Add(IntToStr(Integer(CbProfessorPeriodo.Items.Objects[CbProfessorPeriodo.ItemIndex])));
   slDados.Add(edNomeMateria.Text);
 
   materia := TMateria.Create('materia');
   materia.estado := 0;
   materia.insert(slDados);
 
-  materia.utilitario.LimpaTela(self);
-  edNomeMateria.SetFocus;
-  materia.Free;
-
   self.setMateriasSalvas;
 
-end;
-
-procedure TUnitCadastroMateria.btnSalvarMouseMove(Sender: TObject;
-  Shift: TShiftState; X, Y: Single);
-var
-  utils: TUtils;
-begin
-  utils.validaCampoPreenchido(edNomeMateria.Text, LbNomeMateria.Text);
+  materia.utilitario.LimpaTela(self);
+  materia.Free;
 end;
 
 procedure TUnitCadastroMateria.edNomeMateriaCanFocus(Sender: TObject;
@@ -84,15 +78,18 @@ procedure TUnitCadastroMateria.edNomeMateriaCanFocus(Sender: TObject;
 begin
   if cbPeriodo.ItemIndex = 0 then
     raise Exception.Create('É preciso selecionar um período.');
+  if CbProfessorPeriodo.ItemIndex = 0 then
+    raise Exception.Create('É preciso selecionar um professor.');
 end;
 
 procedure TUnitCadastroMateria.FormCreate(Sender: TObject);
 begin
   self.setPeriodos;
+  self.setProfessor;
   self.setMateriasSalvas;
 
-  if cbPeriodo.Items.Count = 0 then
-    raise Exception.Create('Não há períodos cadastrados ainda.');
+//  if cbPeriodo.Items.Count = 0 then
+//    raise Exception.Create('Não há períodos cadastrados ainda.');
 end;
 
 function TUnitCadastroMateria.getMateriasCadastradas: TFDQuery;
@@ -130,6 +127,9 @@ begin
       self.LbMateriaSalvas.Items.Add(materias_salvas.FieldByName('nome').AsString);
       materias_salvas.Next;
     end;
+
+  if LbMateriaSalvas.Count = 0 then
+    LbMateriaSalvas.Items.Add('Não há Matéria cadastrada.')
 end;
 
 procedure TUnitCadastroMateria.setPeriodos;
@@ -156,16 +156,56 @@ begin
     cbPeriodo.ItemIndex := 0;
   except
     on e:exception do
-     begin
-          ShowMessage('Comando SQL não executado: ' + e.ToString);
-          exit;
-     end;
+      begin
+        ShowMessage('Comando SQL não executado: ' + e.ToString);
+        exit;
+      end;
+  end;
+end;
+
+procedure TUnitCadastroMateria.setProfessor;
+var
+  professores: TFDQuery;
+begin
+  CbProfessorPeriodo.Clear;
+  professores := TFDQuery.Create(nil);
+  professores.Connection := dm_BancoDados.FDEscola;
+  professores.Close;
+  professores.SQL.Clear;
+  professores.SQL.Add('select * from pessoa, professor');
+  professores.SQL.Add('where pessoa.id_pessoa = professor.id_pessoa');
+
+
+  try
+    professores.Open;
+    CbProfessorPeriodo.Items.Add('Selecione o professor');
+
+    while not professores.Eof do
+      begin
+        CbProfessorPeriodo.Items.Objects[CbProfessorPeriodo.Items.Add(professores.FieldByName('nome').AsString)] := TObject(professores.FieldByName('id_professor').AsInteger);
+        professores.Next;
+      end;
+
+    CbProfessorPeriodo.ItemIndex := 0;
+  except
+    on e:exception do
+      begin
+        ShowMessage('Comando SQL não executado: ' + e.ToString);
+        exit;
+      end;
   end;
 end;
 
 procedure TUnitCadastroMateria.spVoltarPrincipalClick(Sender: TObject);
 begin
   self.Close;
+end;
+
+procedure TUnitCadastroMateria.validarPeriodoSelecionado;
+var
+  utils: TUtils;
+begin
+  utils.validaCampoPreenchido(edNomeMateria.Text, LbNomeMateria.Text);
 end;
 
 end.

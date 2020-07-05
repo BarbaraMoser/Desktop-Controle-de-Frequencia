@@ -1,0 +1,29 @@
+unit unit_BancoDados;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, Data.DBXMySQL, Data.FMTBcd, Data.DB,
+  Data.SqlExpr, System.ImageList, FMX.ImgList;
+
+type
+  Tdm_BancoDados = class(TDataModule)
+    baseEscola: TSQLConnection;
+    qrDados: TSQLQuery;
+    ImageList1: TImageList;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  dm_BancoDados: Tdm_BancoDados;
+
+implementation
+
+{%CLASSGROUP 'FMX.Controls.TControl'}
+
+{$R *.dfm}
+
+end.

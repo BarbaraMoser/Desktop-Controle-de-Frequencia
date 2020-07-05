@@ -31,6 +31,7 @@ type
     procedure btnDeletarClick(Sender: TObject);
     procedure btnSalvarMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Single);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   public
@@ -117,6 +118,11 @@ begin
   utils.validaCampoPreenchido(edNomeCurso.Text, LbNomeCurso.Text);
 
   edNomeCurso.SetFocus;
+end;
+
+procedure TUnitCadastroCursos.FormCreate(Sender: TObject);
+begin
+  self.edNomeCurso.SetFocus;
 end;
 
 procedure TUnitCadastroCursos.spVoltarPrincipalClick(Sender: TObject);

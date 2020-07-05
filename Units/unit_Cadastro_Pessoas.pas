@@ -18,7 +18,7 @@ type
     edCpf: TEdit;
     LbCpf: TLabel;
     dtDataNasc: TDateEdit;
-    Label4: TLabel;
+    LbDataNascimento: TLabel;
     cbTipoPessoa: TComboBox;
     Label5: TLabel;
     Panel4: TPanel;
@@ -38,7 +38,7 @@ type
     procedure btnDeletarClick(Sender: TObject);
     procedure dtDataNascCanFocus(Sender: TObject; var ACanFocus: Boolean);
     procedure edCpfCanFocus(Sender: TObject; var ACanFocus: Boolean);
-//    procedure cbTipoPessoaCanFocus(Sender: TObject; var ACanFocus: Boolean);
+    procedure cbTipoPessoaCanFocus(Sender: TObject; var ACanFocus: Boolean);
     procedure FormCreate(Sender: TObject);
   private
     infoPessoa: TList;
@@ -94,6 +94,9 @@ var
   foto: TCadastro;
   last_id:String;
 begin
+  if cbTipoPessoa.ItemIndex = 0 then
+      raise Exception.Create('É preciso selecionar um tipo de pessoa.');
+
   slDadosPessoa := TStringList.Create;
   slDadosPessoa.Clear;
 
@@ -165,15 +168,17 @@ begin
   FreeAndNil(foto);
 end;
 
-//procedure TUnitCadastroPessoas.cbTipoPessoaCanFocus(Sender: TObject;
-//  var ACanFocus: Boolean);
-//var
-//  utils: TUtils;
-//begin
-//  utils.verificarDataNascimento(dtDataNasc.Date, dtDataNasc);
-//
-//  dtDataNasc.SetFocus;
-//end;
+
+procedure TUnitCadastroPessoas.cbTipoPessoaCanFocus(Sender: TObject;
+  var ACanFocus: Boolean);
+var
+  utils: TUtils;
+begin
+  utils.verificarDataNascimento(dtDataNasc.Date);
+
+  dtDataNasc.SetFocus;
+end;
+
 
 procedure TUnitCadastroPessoas.dtDataNascCanFocus(Sender: TObject; var ACanFocus: Boolean);
 var
@@ -198,7 +203,8 @@ end;
 
 procedure TUnitCadastroPessoas.FormCreate(Sender: TObject);
 begin
-  self.dtDataNasc.Data := now;
+  self.dtDataNasc.Date := now;
+  self.cbTipoPessoa.ItemIndex := 0;
 end;
 
 procedure TUnitCadastroPessoas.SpbtBuscarImagemClick(Sender: TObject);
